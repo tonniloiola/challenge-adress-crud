@@ -3,6 +3,7 @@ package br.com.tonni.service;
 import br.com.tonni.data.AdressDto;
 import br.com.tonni.ports.api.AdressServicePort;
 import br.com.tonni.ports.spi.AdressPersistencePort;
+import br.com.tonni.ports.spi.LocationFromGooglePort;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,8 +12,11 @@ public class AdressServiceImpl implements AdressServicePort {
 
     private AdressPersistencePort adressPersistencePort;
 
-    public AdressServiceImpl(AdressPersistencePort adressPersistencePort) {
+    private LocationFromGooglePort locationFromGooglePort;
+
+    public AdressServiceImpl(AdressPersistencePort adressPersistencePort, LocationFromGooglePort locationFromGooglePort) {
         this.adressPersistencePort = adressPersistencePort;
+        this.locationFromGooglePort = locationFromGooglePort;
     }
 
     @Override
@@ -27,11 +31,18 @@ public class AdressServiceImpl implements AdressServicePort {
 
     @Override
     public AdressDto save(AdressDto adress) {
+        if(validationLatAndLong(adress)){
+            locationFromGooglePort.getLocationOfAdress(adress);
+        }
+
         return this.adressPersistencePort.save(adress);
     }
 
     @Override
     public Optional<AdressDto> update(Long adressId, AdressDto adressRequest) {
+        if(validationLatAndLong(adressRequest)){
+            locationFromGooglePort.getLocationOfAdress(adressRequest);
+        }
         return adressPersistencePort.findByIdOptional(adressId)
                 .map(adress -> {
                     adress.setStreetName (adressRequest.getStreetName());
@@ -56,4 +67,9 @@ public class AdressServiceImpl implements AdressServicePort {
                     return this.delete(adressId);
                 });
     }
+
+    private boolean validationLatAndLong(AdressDto adress) {
+        return adress.getLatitude() == null && adress.getLongitude() == null;
+    }
+
 }

@@ -17,24 +17,16 @@ public class AdressJpaAdapter implements AdressPersistencePort {
     @Autowired
     private AdressRepository adressRepository;
 
-    @Autowired
-    LocationFromGoogle locationFromGoogle;
-
     @Override
     public List<AdressDto> findAll() {
 
         List<Adress> adress = (List<Adress>) adressRepository.findAll();
-//        locationFromGoogle.getLocationOfAdress(adress.get(0));
         return AdressMapper.INSTANCE.adressListToAdressDtoList(adress);
     }
 
     @Override
     public AdressDto save(AdressDto adressDto) {
         Adress adress = AdressMapper.INSTANCE.adressDtoToAdress(adressDto);
-
-        if(adress.getLatitude() == null && adress.getLongitude() == null){
-            locationFromGoogle.getLocationOfAdress(adress);
-        }
 
         Adress adressSaved = adressRepository.save(adress);
 
@@ -67,9 +59,6 @@ public class AdressJpaAdapter implements AdressPersistencePort {
     public Optional<AdressDto>  update(Long adressId, AdressDto adressRequest) {
         Adress adress = AdressMapper.INSTANCE.adressDtoToAdress(adressRequest);
 
-        if(adress.getLatitude() == null && adress.getLongitude() == null){
-            locationFromGoogle.getLocationOfAdress(adress);
-        }
         Adress adressSaved = adressRepository.save(adress);
 
         return Optional.ofNullable(AdressMapper.INSTANCE.adressToAdressDto(adressSaved));
