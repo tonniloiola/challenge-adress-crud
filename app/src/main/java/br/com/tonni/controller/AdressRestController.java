@@ -18,6 +18,13 @@ public class AdressRestController {
     @Autowired
     private AdressServicePort adressServicePort;
 
+    public AdressRestController(AdressServicePort adressServicePort) {
+        this.adressServicePort = adressServicePort;
+    }
+
+    public AdressRestController() {
+    }
+
     @Operation(
             summary = "Retorna uma lista de endereços",
             description = "Retorna uma lista de endereços.",
